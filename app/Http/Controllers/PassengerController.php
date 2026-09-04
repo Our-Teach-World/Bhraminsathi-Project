@@ -28,14 +28,21 @@ class PassengerController extends Controller
         }
 
         $buses = $query->get()->map(function ($bus) {
+            $routeName = $bus->route ? $bus->route->name : 'Local City Route';
+            $parts = explode('↔', $routeName);
+            $heading = isset($parts[1]) ? trim($parts[1]) : $routeName;
+
             return [
-                'id' => 'BUS-' . $bus->id,
+                'id' => 'BUS-' . sprintf("%02d", $bus->id),
+                'numeric_id' => $bus->id,
                 'bus_number' => $bus->bus_number,
-                'route_name' => $bus->route ? $bus->route->name : 'Local Route',
+                'route_name' => $routeName,
+                'route_id' => $bus->route_id ?: 12,
+                'heading' => $heading,
                 'status' => $bus->status,
-                'lat' => $bus->current_lat,
-                'lng' => $bus->current_lng,
-                'last_updated' => $bus->last_updated_at ? $bus->last_updated_at->diffForHumans() : 'Never'
+                'lat' => (float) $bus->current_lat,
+                'lng' => (float) $bus->current_lng,
+                'last_updated' => $bus->last_updated_at ? $bus->last_updated_at->diffForHumans() : 'Just now'
             ];
         });
 

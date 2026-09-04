@@ -36,34 +36,50 @@ function populateBusSearchResults() {
     const listContainer = document.getElementById('bus-results-list');
     if (!listContainer) return;
 
-    const state = window.BhraminData ? window.BhraminData.getState() : null;
-    const buses = state && state.buses ? state.buses : [
-        { id: 'BUS-12', busNumber: 'UK-07-PA-1234', routeName: 'City Centre ↔ Airport', routeId: 12, heading: 'Airport', status: 'live' },
-        { id: 'BUS-42', busNumber: 'UK-07-PA-4242', routeName: 'ISBT ↔ Rajpur Road', routeId: 42, heading: 'Rajpur Road', status: 'live' },
-        { id: 'BUS-07', busNumber: 'UK-07-PA-0707', routeName: 'Railway Station ↔ ISBT', routeId: 7, heading: 'Railway Station', status: 'live' },
-        { id: 'BUS-08', busNumber: 'UK-07-PA-0808', routeName: 'ISBT ↔ Rajpur Road', routeId: 42, heading: 'Ghanta Ghar', status: 'error' }
-    ];
+    fetch('/api/passenger/buses?route_id=all')
+        .then(res => res.json())
+        .then(apiRes => {
+            let buses = [];
+            if (apiRes && apiRes.status === 'success' && apiRes.data) {
+                buses = apiRes.data;
+            } else {
+                buses = window.BhraminData ? window.BhraminData.getState().buses : [];
+            }
+            renderSearchItems(buses);
+        })
+        .catch(() => {
+            const buses = window.BhraminData ? window.BhraminData.getState().buses : [];
+            renderSearchItems(buses);
+        });
 
-    listContainer.innerHTML = '';
-    buses.forEach(b => {
-        const div = document.createElement('div');
-        div.className = 'bus-result-item';
-        div.onclick = () => selectDropPoint(b.heading || b.routeName, b.routeId || 12);
+    function renderSearchItems(buses) {
+        listContainer.innerHTML = '';
+        buses.forEach(b => {
+            const div = document.createElement('div');
+            div.className = 'bus-result-item';
+            const routeIdToUse = b.route_id || b.routeId || 12;
+            const headingText = b.heading || (b.route_name ? b.route_name.split('↔')[1] : 'City Center');
+            const busCode = b.id || ('BUS-' + b.numeric_id);
 
-        let statusText = b.status === 'live' ? '🟢 Live' : '🔴 Standby';
+            div.onclick = () => selectDropPoint(headingText, routeIdToUse);
 
-        div.innerHTML = `
-            <div class="bus-result-info">
-                <span class="bus-badge-tag">${b.id}</span>
-                <div>
-                    <div class="bus-result-title">${b.heading ? 'Drop: ' + b.heading : b.id}</div>
-                    <div class="bus-result-route">${b.routeName} (${b.busNumber})</div>
+            let statusBadge = b.status === 'live' ? 
+                '<span style="font-size: 0.75rem; font-weight: 700; color: #10B981; background: #D1FAE5; padding: 3px 8px; border-radius: 12px;">🟢 Live Now</span>' : 
+                '<span style="font-size: 0.75rem; font-weight: 700; color: #6B7280; background: #F3F4F6; padding: 3px 8px; border-radius: 12px;">⚪ Standby</span>';
+
+            div.innerHTML = `
+                <div class="bus-result-info">
+                    <span class="bus-badge-tag">${busCode}</span>
+                    <div>
+                        <div class="bus-result-title">Drop: ${headingText}</div>
+                        <div class="bus-result-route">${b.route_name || b.routeName} (${b.bus_number || b.busNumber})</div>
+                    </div>
                 </div>
-            </div>
-            <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);">${statusText}</span>
-        `;
-        listContainer.appendChild(div);
-    });
+                ${statusBadge}
+            `;
+            listContainer.appendChild(div);
+        });
+    }
 }
 
 function closeDestinationModal(e) {
@@ -272,20 +288,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const busesToDisplay = busesList.filter(b => {
             if (filteredRouteId !== 'all' && b.routeId && b.routeId !== parseInt(filteredRouteId)) return false;
             
-            if (b.lat && b.lng && locationGranted) {
+            if (b.lat && b.lng) {
                 const dist = calculateDistance(userCoords.lat, userCoords.lng, b.lat, b.lng);
                 b.calculatedDistKm = dist;
-                return dist <= 15.0; // Expand range to 15km for city testing
             }
-            return true;
+            return true; // Show all active buses on city map
         });
 
         // Update range badge
         const rangeText = document.getElementById('range-text');
+        const liveCount = busesToDisplay.filter(b => b.status === 'live').length;
         if (rangeText) {
-            rangeText.textContent = locationGranted ? 
-                `Buses in Range (${busesToDisplay.length} nearby)` : 
-                `Showing All Active Buses`;
+            rangeText.textContent = `Live Buses Active: ${liveCount} in city`;
         }
 
         // Draw active route trajectory
@@ -299,6 +313,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }).addTo(map);
         }
 
+        const boundsGroup = [];
+        if (locationGranted && userCoords.lat) {
+            boundsGroup.push([userCoords.lat, userCoords.lng]);
+        }
+
         busesToDisplay.forEach(bus => {
             if (bus.lat && bus.lng) {
                 const marker = L.marker([bus.lat, bus.lng], {
@@ -310,9 +329,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 currentMarkers.push(marker);
+                if (bus.status === 'live') {
+                    boundsGroup.push([bus.lat, bus.lng]);
+                }
             }
         });
+
+        // Auto-fit map view to include live bus markers if present
+        if (boundsGroup.length > 1 && !window.userPannedMap) {
+            try {
+                map.fitBounds(L.latLngBounds(boundsGroup), { padding: [40, 40], maxZoom: 15 });
+            } catch(e) {}
+        }
     };
+
+    // Auto-poll live bus positions from conductor network every 3 seconds
+    setInterval(() => {
+        if (window.renderBuses) window.renderBuses();
+    }, 3000);
 
     const openBusDrawer = (bus) => {
         const drawer = document.getElementById('bus-drawer');

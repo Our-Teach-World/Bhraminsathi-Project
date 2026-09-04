@@ -162,21 +162,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 let liveSpeedKmH = 0;
 
-                // Priority 1: Hardware Device Speed (m/s to km/h)
-                if (pos.coords.speed !== null && pos.coords.speed !== undefined && !isNaN(pos.coords.speed)) {
-                    liveSpeedKmH = Math.round(pos.coords.speed * 3.6);
-                } else if (lastPos && lastTime) {
-                    // Priority 2: Calculate from position delta
+                if (lastPos && lastTime) {
                     const timeDiffSec = (now - lastTime) / 1000;
-                    if (timeDiffSec > 0) {
-                        const distKm = calculateDistance(lastPos.lat, lastPos.lng, lat, lng);
-                        liveSpeedKmH = Math.round((distKm / timeDiffSec) * 3600);
-                        if (liveSpeedKmH > 120 || liveSpeedKmH < 0) liveSpeedKmH = 0; // Filter noise
-                    }
-                }
+                    const distKm = calculateDistance(lastPos.lat, lastPos.lng, lat, lng);
+                    const distMeters = distKm * 1000;
 
-                lastPos = { lat, lng };
-                lastTime = now;
+                    // Filter out stationary GPS drift (movement less than 12 meters is noise -> 0 km/h)
+                    if (distMeters >= 12 && timeDiffSec > 1) {
+                        if (pos.coords.speed !== null && pos.coords.speed !== undefined && !isNaN(pos.coords.speed) && pos.coords.speed > 0) {
+                            liveSpeedKmH = Math.round(pos.coords.speed * 3.6);
+                        } else {
+                            liveSpeedKmH = Math.round((distKm / timeDiffSec) * 3600);
+                        }
+
+                        if (liveSpeedKmH > 120 || liveSpeedKmH < 3) liveSpeedKmH = 0;
+
+                        lastPos = { lat, lng };
+                        lastTime = now;
+                    } else if (timeDiffSec >= 4) {
+                        // Device stationary for 4+ seconds
+                        liveSpeedKmH = 0;
+                        lastPos = { lat, lng };
+                        lastTime = now;
+                    } else {
+                        liveSpeedKmH = 0;
+                    }
+                } else {
+                    lastPos = { lat, lng };
+                    lastTime = now;
+                    liveSpeedKmH = 0;
+                }
 
                 const speedEl = document.getElementById('stat-speed');
                 if (speedEl) speedEl.textContent = `${liveSpeedKmH} km/h`;

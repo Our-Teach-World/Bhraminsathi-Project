@@ -44,6 +44,35 @@ class ConductorController extends Controller
     }
 
     /**
+     * Helper to resolve bus model from code (BUS-12, BUS-42, UK-07-PA-1234) or numeric ID
+     */
+    private function findBus($busIdInput)
+    {
+        if (empty($busIdInput)) {
+            return Bus::first();
+        }
+
+        if (is_numeric($busIdInput)) {
+            $bus = Bus::find($busIdInput);
+            if ($bus) return $bus;
+        }
+
+        $str = (string) $busIdInput;
+        $num = (int) preg_replace('/[^0-9]/', '', $str);
+
+        // Code aliases for UI dropdown tags
+        if ($num === 12) $num = 1;
+        if ($num === 42) $num = 2;
+        if ($num === 8 || $num === 7) $num = 3;
+
+        $bus = Bus::find($num);
+        if ($bus) return $bus;
+
+        $bus = Bus::where('bus_number', 'like', "%{$str}%")->first();
+        return $bus ?: Bus::first();
+    }
+
+    /**
      * Start a conductor tracking session for a bus
      */
     public function startSession(Request $request)
@@ -52,9 +81,7 @@ class ConductorController extends Controller
             'bus_id' => 'required'
         ]);
 
-        // Find Bus by code or ID
-        $bus = Bus::where('bus_code', $request->bus_id)->first() 
-            ?? Bus::find(is_numeric($request->bus_id) ? $request->bus_id : 1);
+        $bus = $this->findBus($request->bus_id);
 
         if (!$bus) {
             return response()->json(['status' => 'error', 'message' => 'Bus vehicle not found'], 404);
@@ -97,7 +124,8 @@ class ConductorController extends Controller
             'status' => 'success',
             'message' => 'Shift session started successfully.',
             'session_id' => $session->id,
-            'conductor_id' => $conductor->id
+            'conductor_id' => $conductor->id,
+            'bus_id' => $bus->id
         ]);
     }
 
@@ -112,20 +140,21 @@ class ConductorController extends Controller
             'lng' => 'required|numeric'
         ]);
 
-        $bus = Bus::where('bus_code', $request->bus_id)->first() 
-            ?? Bus::find(is_numeric($request->bus_id) ? $request->bus_id : 1);
+        $bus = $this->findBus($request->bus_id);
 
         if ($bus) {
             $bus->update([
                 'current_lat' => $request->lat,
                 'current_lng' => $request->lng,
+                'status' => 'live',
                 'last_updated_at' => now()
             ]);
         }
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Location updated in database.'
+            'message' => 'Location updated in database.',
+            'bus_id' => $bus ? $bus->id : null
         ]);
     }
 
