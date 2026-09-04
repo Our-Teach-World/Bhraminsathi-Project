@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BhraminSathi — Live Public Transport Companion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="stylesheet" href="public/css/app.css">
+</head>
+<body>
+    <header class="app-header">
+        <a href="index.html" class="brand-logo">
+            <div class="icon">🚌</div>
+            <span>BhraminSathi</span>
+        </a>
+        <nav class="nav-links">
+            <a href="index.html" class="nav-item active">Passenger Search</a>
+            <a href="conductor.html" class="nav-item">Conductor Session</a>
+            <a href="admin.html" class="nav-item">Admin Panel</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="passenger-container">
+            <div class="route-filters-overlay">
+                <button class="filter-chip active" data-route="all">All</button>
+                <button class="filter-chip" data-route="12">Route 12</button>
+                <button class="filter-chip" data-route="42">Route 42</button>
+                <button class="filter-chip" data-route="7">Route 7</button>
+            </div>
+
+            <div id="passenger-map"></div>
+
+            <div class="search-card-floating" id="search-box">
+                <div class="search-field-group">
+                    <div class="search-input-wrapper">
+                        <span style="color: var(--primary-blue)">📍</span>
+                        <input type="text" id="input-source" value="Current Location" placeholder="Source location">
+                    </div>
+                    <div class="search-input-wrapper">
+                        <span style="color: var(--primary-blue)">🎯</span>
+                        <input type="text" id="input-destination" value="Airport" placeholder="Where to? (e.g. Airport, Rajpur Rd)">
+                    </div>
+                    <button class="btn-primary" id="btn-find-buses">
+                        <span>🚌 Find Buses</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bus-drawer" id="bus-drawer">
+                <div class="drawer-header">
+                    <div>
+                        <h3 id="drawer-bus-title" style="font-size: 1.3rem; font-weight: 700;">Bus 12</h3>
+                        <p id="drawer-bus-route" style="color: var(--text-secondary); font-size: 0.9rem;">City Centre ↔ Airport</p>
+                    </div>
+                    <div id="drawer-bus-badge" class="status-badge live">
+                        <span>●</span> <span id="badge-text">Live</span>
+                    </div>
+                </div>
+
+                <div id="drawer-live-content">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; background: var(--bg-light-blue); padding: 12px 16px; border-radius: var(--radius-md);">
+                        <div>
+                            <p style="font-weight: 600; color: var(--primary-blue); font-size: 0.95rem;">▲ Heading to your destination</p>
+                            <p style="font-size: 0.85rem; color: var(--text-muted);">Position updated 1 min ago via Conductor GPS</p>
+                        </div>
+                        <div style="background: var(--surface-white); color: var(--primary-blue); font-weight: 700; padding: 6px 14px; border-radius: var(--radius-full); border: 1px solid var(--border-blue);">
+                            <span id="drawer-eta">4 min</span>
+                        </div>
+                    </div>
+
+                    <div class="verification-card">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                            <div style="width: 28px; height: 28px; background: var(--primary-blue); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px;">👤</div>
+                            <div>
+                                <strong style="font-size: 0.95rem; color: var(--text-primary);">Confirm with the conductor</strong>
+                                <p style="font-size: 0.8rem; color: var(--text-secondary);">When boarding, verify the destination — GPS shows likely bus.</p>
+                            </div>
+                        </div>
+
+                        <div class="verification-step">
+                            <div class="step-num">1</div>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Check the bus number matches <strong id="verify-bus-no">Bus 12</strong></p>
+                        </div>
+                        <div class="verification-step">
+                            <div class="step-num">2</div>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Ask the conductor: <strong id="verify-question" style="color: var(--primary-blue);">"Airport ja raha hai?"</strong></p>
+                        </div>
+                        <div class="verification-step">
+                            <div class="step-num">3</div>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary);">Board once verbally confirmed by conductor</p>
+                        </div>
+                    </div>
+
+                    <button class="btn-primary" style="margin-top: 20px;" onclick="alert('Journey started! Keep your verbal confirmation ready.')">
+                        Get on this bus
+                    </button>
+                </div>
+
+                <div id="drawer-offline-content" style="display: none; text-align: center; padding: 20px 0;">
+                    <div style="font-size: 40px; margin-bottom: 12px;">⚠️</div>
+                    <h4 style="font-size: 1.1rem; color: var(--text-primary); margin-bottom: 8px;">No live tracking right now</h4>
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); max-width: 320px; margin: 0 auto 16px;">
+                        No conductor is currently connected for this bus. We display only verified live locations to ensure honest data.
+                    </p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Static Route: City Centre ↔ Airport (Stops: Station, Chowk, Mall)</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="public/js/data.js"></script>
+    <script src="public/js/passenger.js"></script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BhraminSathi — Admin Panel Overview</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="public/css/app.css">
+</head>
+<body>
+    <header class="app-header">
+        <a href="index.html" class="brand-logo">
+            <div class="icon">🚌</div>
+            <span>BhraminSathi Admin</span>
+        </a>
+        <nav class="nav-links">
+            <a href="index.html" class="nav-item">Passenger Search</a>
+            <a href="conductor.html" class="nav-item">Conductor Session</a>
+            <a href="admin.html" class="nav-item active">Admin Panel</a>
+        </nav>
+    </header>
+
+    <main>
+        <div class="admin-layout">
+            <aside class="admin-sidebar">
+                <h4 style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 8px;">Admin Navigation</h4>
+                <a href="admin.html" class="nav-item active">📊 Live Overview</a>
+                <a href="admin-bus-detail.html" class="nav-item">🚍 Bus Detail</a>
+                <a href="admin-session-log.html" class="nav-item">📋 Session Logs</a>
+            </aside>
+
+            <main class="admin-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div>
+                        <h1 style="font-size: 1.6rem; font-weight: 700;">Live Overview</h1>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem;">Real-time bus network status & conductor handoff monitoring</p>
+                    </div>
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">Last updated: <strong style="color: var(--primary-blue)">Just now</strong></span>
+                </div>
+
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div>
+                            <div class="kpi-label">Total Buses</div>
+                            <div class="kpi-val" id="kpi-total">24</div>
+                        </div>
+                        <div style="font-size: 32px;">🚌</div>
+                    </div>
+                    <div class="kpi-card" style="border-left: 4px solid #10B981;">
+                        <div>
+                            <div class="kpi-label">Live Active</div>
+                            <div class="kpi-val" style="color: #10B981;" id="kpi-live">17</div>
+                        </div>
+                        <div style="font-size: 32px;">📶</div>
+                    </div>
+                    <div class="kpi-card" style="border-left: 4px solid #9CA3AF;">
+                        <div>
+                            <div class="kpi-label">No Session</div>
+                            <div class="kpi-val" style="color: #6B7280;" id="kpi-offline">4</div>
+                        </div>
+                        <div style="font-size: 32px;">💤</div>
+                    </div>
+                    <div class="kpi-card" style="border-left: 4px solid #DC2626; background: #FEF2F2;">
+                        <div>
+                            <div class="kpi-label">Needs Attention</div>
+                            <div class="kpi-val" style="color: #DC2626;" id="kpi-error">3</div>
+                        </div>
+                        <div style="font-size: 32px;">⚠️</div>
+                    </div>
+                </div>
+
+                <div style="background: #FEF2F2; border: 1px solid #FCA5A5; border-radius: var(--radius-md); padding: 16px; margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 8px; color: #DC2626; font-weight: 700;">
+                            <span>⚠️</span>
+                            <span>Needs Attention (Stalled Handoffs)</span>
+                        </div>
+                        <span class="status-badge error">Pending Interventions</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <div style="background: white; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid #FECACA; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="color: var(--text-primary)">BUS-08</strong> (ISBT ↔ Rajpur Rd)
+                                <span style="font-size: 0.85rem; color: var(--text-secondary); margin-left: 10px;">Passed handoff point Ghanta Ghar 8 mins ago. No new conductor logged in.</span>
+                            </div>
+                            <a href="admin-bus-detail.html" class="btn-danger">Inspect & Remind</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Bus No.</th>
+                                <th>Route</th>
+                                <th>Conductor</th>
+                                <th>Last Location</th>
+                                <th>Last Seen</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-buses-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </main>
+
+    <script src="public/js/data.js"></script>
+    <script src="public/js/admin.js"></script>
+</body>
+</html>
