@@ -129,7 +129,7 @@
         <div class="route-input-group">
             <div class="input-row">
                 <span class="icon-pickup">🟢</span>
-                <input type="text" id="pickup-location-input" placeholder="Your Pickup Location (e.g. City Centre)" value="Current Location (City Centre)">
+                <input type="text" id="pickup-location-input" placeholder="Your Pickup Location (e.g. Jaipur Junction)" value="Current Location (Jaipur)">
                 <button class="clear-input-btn" onclick="document.getElementById('pickup-location-input').value=''">✕</button>
             </div>
             <div class="input-divider"></div>
@@ -153,40 +153,31 @@
         </button>
 
         <!-- Recent Searches Section -->
-        <div class="search-section-title">RECENT SEARCHES</div>
+        <div class="search-section-title">POPULAR JAIPUR ROUTES</div>
         <div class="recent-searches-list">
-            <button class="recent-chip" onclick="selectQuickRoute('City Centre', 'Airport', 12)">
-                <span>📍 Jaipur - Kota (Route 12)</span>
+            <button class="recent-chip" onclick="selectQuickRoute('Jaipur Junction', 'Sanganer Airport', 12)">
+                <span>📍 Jaipur Junction ↔ Airport (Route 12)</span>
             </button>
-            <button class="recent-chip" onclick="selectQuickRoute('Clock Tower', 'Rajpur Road', 42)">
-                <span>📍 Ghanta Ghar - Rajpur Road</span>
+            <button class="recent-chip" onclick="selectQuickRoute('Sindhi Camp ISBT', 'Sitapura Ind. Area', 42)">
+                <span>📍 Sindhi Camp ↔ Sitapura (Route 42)</span>
             </button>
         </div>
 
         <hr style="border: none; border-top: 1px solid var(--border-light); margin: 18px 0;">
 
         <!-- Popular City / Stop Suggestions -->
-        <div class="search-section-title">POPULAR STOPS & CITIES</div>
+        <div class="search-section-title">POPULAR STOPS IN JAIPUR</div>
         <div class="popular-cities-grid">
-            <div class="city-card" onclick="selectDropPoint('Airport', 12)">
+            <div class="city-card" onclick="selectDropPoint('Sanganer Airport', 12)">
                 <span class="city-icon">🛬</span>
-                <span class="city-name">Airport</span>
+                <span class="city-name">Sanganer Airport</span>
             </div>
-            <div class="city-card" onclick="selectDropPoint('Railway Station', 7)">
+            <div class="city-card" onclick="selectDropPoint('Jaipur Junction', 12)">
                 <span class="city-icon">🚉</span>
-                <span class="city-name">Railway Station</span>
+                <span class="city-name">Jaipur Junction</span>
             </div>
-            <div class="city-card" onclick="selectDropPoint('Rajpur Road', 42)">
-                <span class="city-icon">⛰️</span>
-                <span class="city-name">Rajpur Road</span>
-            </div>
-            <div class="city-card" onclick="selectDropPoint('Ghanta Ghar', 12)">
-                <span class="city-icon">🏛️</span>
-                <span class="city-name">Ghanta Ghar</span>
-            </div>
-            <div class="city-card" onclick="selectDropPoint('ISBT Bus Stand', 7)">
+            <div class="city-card" onclick="selectDropPoint('Sindhi Camp ISBT', 42)">
                 <span class="city-icon">🚌</span>
-                <span class="city-name">ISBT Stand</span>
             </div>
             <div class="city-card" onclick="selectDropPoint('Kota Highway', 12)">
                 <span class="city-icon">🛣️</span>

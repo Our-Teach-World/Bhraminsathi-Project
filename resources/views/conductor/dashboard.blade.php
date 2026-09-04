@@ -58,16 +58,16 @@
             <div class="form-group-custom">
                 <label>Assigned Bus Vehicle:</label>
                 <select id="select-bus" class="custom-select-input">
-                    <option value="BUS-12">BUS-12 (UK-07-PA-1234) — City Centre ↔ Airport</option>
-                    <option value="BUS-42">BUS-42 (UK-07-PA-4242) — ISBT ↔ Rajpur Road</option>
-                    <option value="BUS-08">BUS-08 (UK-07-PA-0808) — Stalled @ Ghanta Ghar</option>
+                    <option value="BUS-12">BUS-12 (RJ-14-PA-1234) — Jaipur Junction ↔ Sanganer Airport</option>
+                    <option value="BUS-42">BUS-42 (RJ-14-PA-4242) — Sindhi Camp ISBT ↔ Sitapura Ind. Area</option>
+                    <option value="BUS-08">BUS-08 (RJ-14-PA-0808) — Stalled @ B2 Bypass Junction</option>
                 </select>
             </div>
 
             <div class="change-point-box">
                 <div class="change-point-header">
                     <span>📍 Shift Change-Point:</span>
-                    <strong id="change-point-name">Ghanta Ghar (Geofenced)</strong>
+                    <strong id="change-point-name">B2 Bypass Junction (Geofenced)</strong>
                 </div>
                 <p class="change-point-sub">
                     GPS broadcasting auto-expires upon reaching change-point for handover.

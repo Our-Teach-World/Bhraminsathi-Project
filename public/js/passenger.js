@@ -112,8 +112,8 @@ function applyTwoPointSearch(forcedRouteId = null) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const defaultCenter = [30.3240, 78.0415];
-    let userCoords = { lat: 30.3240, lng: 78.0415 };
+    const defaultCenter = [26.8380, 75.7950]; // Jaipur, Rajasthan
+    let userCoords = { lat: 26.8380, lng: 75.7950 };
     let locationGranted = false;
 
     const map = L.map('passenger-map', { zoomControl: false }).setView(defaultCenter, 14);

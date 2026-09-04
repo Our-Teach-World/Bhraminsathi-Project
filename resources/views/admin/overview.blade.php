@@ -112,8 +112,8 @@
                 </div>
                 <div class="intervention-item">
                     <div>
-                        <strong class="bus-tag">BUS-08</strong> (UK-07-PA-0808 • ISBT ↔ Rajpur Rd)
-                        <p class="intervention-text">Passed change-point Ghanta Ghar 8 mins ago. Shift auto-expired. Conductor shift handoff pending.</p>
+                        <strong class="bus-tag">BUS-08</strong> (RJ-14-PA-0808 • Sindhi Camp ISBT ↔ Sitapura Ind. Area)
+                        <p class="intervention-text">Passed change-point B2 Bypass Junction 8 mins ago. Shift auto-expired. Conductor shift handoff pending.</p>
                     </div>
                     <a href="/admin/bus/BUS-08" class="btn-inspect-action">Inspect & Dispatch SMS</a>
                 </div>

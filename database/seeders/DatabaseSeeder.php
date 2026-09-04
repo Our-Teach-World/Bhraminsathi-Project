@@ -11,57 +11,57 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Seed Routes
+        // 1. Seed Jaipur Routes
         $r12 = Route::create([
-            'name' => 'City Centre ↔ Airport',
-            'start_point_lat' => 30.3165,
-            'start_point_lng' => 78.0322,
-            'end_point_lat' => 30.3340,
-            'end_point_lng' => 78.0510,
-            'change_point_lat' => 30.3240,
-            'change_point_lng' => 78.0415,
-            'stops_json' => ['City Centre', 'Railway Station', 'Ghanta Ghar', 'Airport']
+            'name' => 'Jaipur Junction ↔ Sanganer Airport',
+            'start_point_lat' => 26.9200,
+            'start_point_lng' => 75.7877,
+            'end_point_lat' => 26.8285,
+            'end_point_lng' => 75.8056,
+            'change_point_lat' => 26.8380,
+            'change_point_lng' => 75.7950,
+            'stops_json' => ['Jaipur Junction', 'MI Road', 'Rambagh Circle', 'Tonk Phatak', 'B2 Bypass', 'Sanganer Airport']
         ]);
 
         $r42 = Route::create([
-            'name' => 'ISBT ↔ Rajpur Road',
-            'start_point_lat' => 30.2850,
-            'start_point_lng' => 78.0050,
-            'end_point_lat' => 30.3650,
-            'end_point_lng' => 78.0800,
-            'change_point_lat' => 30.3240,
-            'change_point_lng' => 78.0415,
-            'stops_json' => ['ISBT', 'Ghanta Ghar', 'Rajpur Road']
+            'name' => 'Sindhi Camp ISBT ↔ Sitapura Ind. Area',
+            'start_point_lat' => 26.9248,
+            'start_point_lng' => 75.7980,
+            'end_point_lat' => 26.7820,
+            'end_point_lng' => 75.8230,
+            'change_point_lat' => 26.8380,
+            'change_point_lng' => 75.7950,
+            'stops_json' => ['Sindhi Camp ISBT', 'Ajmer Gate', 'SMS Hospital', 'Tonk Phatak', 'B2 Bypass', 'Sitapura Ind. Area']
         ]);
 
         // 2. Seed Conductors
         $c1 = Conductor::create(['name' => 'Ramesh K.', 'phone' => '+91 98765 43210']);
         $c2 = Conductor::create(['name' => 'Suresh M.', 'phone' => '+91 98765 11223']);
 
-        // 3. Seed Buses
+        // 3. Seed Jaipur Bus Fleet
         Bus::create([
-            'bus_number' => 'UK-07-PA-1234',
+            'bus_number' => 'RJ-14-PA-1234',
             'route_id' => $r12->id,
-            'current_lat' => 30.3200,
-            'current_lng' => 78.0370,
+            'current_lat' => 26.8380,
+            'current_lng' => 75.7950,
             'status' => 'live',
             'last_updated_at' => now()
         ]);
 
         Bus::create([
-            'bus_number' => 'UK-07-PA-4242',
+            'bus_number' => 'RJ-14-PA-4242',
             'route_id' => $r42->id,
-            'current_lat' => 30.3300,
-            'current_lng' => 78.0480,
+            'current_lat' => 26.7850,
+            'current_lng' => 75.8200,
             'status' => 'live',
             'last_updated_at' => now()
         ]);
 
         Bus::create([
-            'bus_number' => 'UK-07-PA-0808',
+            'bus_number' => 'RJ-14-PA-0808',
             'route_id' => $r42->id,
-            'current_lat' => 30.3240,
-            'current_lng' => 78.0415,
+            'current_lat' => 26.8380,
+            'current_lng' => 75.7950,
             'status' => 'error',
             'last_updated_at' => now()->subMinutes(8)
         ]);

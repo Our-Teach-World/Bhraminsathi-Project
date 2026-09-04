@@ -221,8 +221,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const startSimulation = (busId) => {
-        let currentLat = 30.3200;
-        let currentLng = 78.0370;
+        let currentLat = 26.8380;
+        let currentLng = 75.7950;
 
         locationInterval = setInterval(() => {
             currentLat += (Math.random() - 0.5) * 0.0015;
