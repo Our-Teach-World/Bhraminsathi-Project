@@ -14,9 +14,14 @@ use App\Http\Controllers\AdminController;
 // 1. Passenger Application View (Default Homepage)
 Route::get('/', [PassengerController::class, 'index'])->name('passenger.index');
 
-// 2. Conductor Dashboard View
+// 2. Conductor Dashboard View & API endpoints
 Route::get('/conductor', [ConductorController::class, 'dashboard']);
 Route::get('/conductor/dashboard', [ConductorController::class, 'dashboard'])->name('conductor.dashboard');
+Route::post('/api/conductor/register', [ConductorController::class, 'register']);
+Route::post('/conductor/register', [ConductorController::class, 'register']);
+Route::post('/api/conductor/session/start', [ConductorController::class, 'startSession']);
+Route::post('/api/conductor/session/stop', [ConductorController::class, 'stopSession']);
+Route::post('/api/conductor/location', [ConductorController::class, 'updateLocation']);
 
 // 3. Admin Dashboard & Panel Views
 Route::get('/admin', [AdminController::class, 'overview']);

@@ -16,6 +16,7 @@ Route::get('/passenger/buses', [PassengerController::class, 'getNearbyBuses']);
 Route::get('/buses/nearby', [PassengerController::class, 'getNearbyBuses']);
 
 // Conductor Shift & GPS Broadcasting API
+Route::post('/conductor/register', [ConductorController::class, 'register']);
 Route::post('/conductor/session/start', [ConductorController::class, 'startSession']);
 Route::post('/conductor/session/stop', [ConductorController::class, 'stopSession']);
 Route::post('/conductor/location', [ConductorController::class, 'updateLocation']);

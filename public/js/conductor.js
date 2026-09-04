@@ -14,7 +14,57 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
     return R * c;
 }
 
+function saveConductorProfile() {
+    const name = document.getElementById('reg-conductor-name').value.trim() || 'Rajesh Sharma';
+    const phone = document.getElementById('reg-conductor-phone').value.trim() || '9876543210';
+
+    fetch('/api/conductor/register', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+        },
+        body: JSON.stringify({ name, phone })
+    })
+    .then(res => res.json())
+    .then(data => {
+        const conductorId = (data.conductor && data.conductor.id) ? data.conductor.id : ('COND-' + phone.slice(-4));
+        const profile = { name, phone, id: conductorId };
+        localStorage.setItem('bhramin_conductor_profile', JSON.stringify(profile));
+        document.getElementById('conductor-register-modal').style.display = 'none';
+        loadConductorProfile();
+    })
+    .catch(err => {
+        console.warn('Database save notice (local fallback):', err);
+        const profile = { name, phone, id: 'COND-' + phone.slice(-4) };
+        localStorage.setItem('bhramin_conductor_profile', JSON.stringify(profile));
+        document.getElementById('conductor-register-modal').style.display = 'none';
+        loadConductorProfile();
+    });
+}
+
+function loadConductorProfile() {
+    const saved = localStorage.getItem('bhramin_conductor_profile');
+    if (saved) {
+        try {
+            const p = JSON.parse(saved);
+            document.getElementById('display-conductor-name').textContent = p.name;
+            document.getElementById('display-conductor-badge').textContent = `ID: ${p.id} • Shift Active`;
+            return p;
+        } catch(e) {}
+    } else {
+        document.getElementById('conductor-register-modal').style.display = 'flex';
+    }
+    return null;
+}
+
+function resetConductorProfile() {
+    localStorage.removeItem('bhramin_conductor_profile');
+    document.getElementById('conductor-register-modal').style.display = 'flex';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    loadConductorProfile();
     let isTracking = false;
     let locationInterval = null;
     let watchId = null;
@@ -66,6 +116,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const busId = busSelect.value;
         lastPos = null;
         lastTime = null;
+
+        const profile = loadConductorProfile() || { name: 'Rajesh Sharma', phone: '9876543210', id: 1 };
+        const numericBusId = parseInt(busId.replace('BUS-', '')) || 12;
+
+        // Post shift start session to database
+        fetch('/api/conductor/session/start', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: JSON.stringify({
+                bus_id: numericBusId,
+                conductor_id: profile.id,
+                conductor_name: profile.name,
+                conductor_phone: profile.phone
+            })
+        }).then(res => res.json())
+          .then(data => console.log('Database Shift session started:', data))
+          .catch(err => console.warn('Database start notice:', err));
 
         // Update UI
         btnToggle.textContent = '🔴 End Shift & Stop GPS Stream';
@@ -176,6 +246,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             window.BhraminData.saveState(state);
         }
+
+        // Post stop shift session to database
+        const numericBusId = parseInt(busId.replace('BUS-', '')) || 12;
+        fetch('/api/conductor/session/stop', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: JSON.stringify({
+                bus_id: numericBusId,
+                session_id: window.activeConductorSessionId || 1,
+                reason: (reason === 'geofence' ? 'geofence_auto' : 'manual')
+            })
+        }).catch(err => console.log('API stop notice:', err));
     };
 
     btnHandoff.addEventListener('click', () => {

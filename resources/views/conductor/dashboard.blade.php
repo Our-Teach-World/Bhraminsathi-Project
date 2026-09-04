@@ -2,14 +2,40 @@
 
 @section('content')
 <div class="conductor-app-wrapper">
+    <!-- Quick One-Time Conductor Registration Modal -->
+    <div class="modal-overlay" id="conductor-register-modal" style="display: none;">
+        <div class="permission-modal-card" style="text-align: left; max-width: 440px;">
+            <div style="text-align: center; margin-bottom: 16px;">
+                <div class="permission-icon" style="background: var(--bg-light-blue); color: var(--primary-blue);">👨‍✈️</div>
+                <h3 style="font-size: 1.3rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Conductor Quick Login</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary);">One-time setup for live shift location broadcasting</p>
+            </div>
+
+            <div class="form-group-custom" style="margin-bottom: 14px;">
+                <label style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 6px;">Your Name / Conductor Name:</label>
+                <input type="text" id="reg-conductor-name" class="custom-select-input" placeholder="e.g. Rajesh Sharma" style="background: white;">
+            </div>
+
+            <div class="form-group-custom" style="margin-bottom: 20px;">
+                <label style="font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 6px;">Mobile Number / Conductor ID:</label>
+                <input type="text" id="reg-conductor-phone" class="custom-select-input" placeholder="e.g. 9876543210" style="background: white;">
+            </div>
+
+            <button class="btn-conductor-primary" onclick="saveConductorProfile()">
+                <span>🚀 Save & Start Shift Portal</span>
+            </button>
+        </div>
+    </div>
+
     <!-- Sleek Top Header -->
     <header class="conductor-header">
         <div class="conductor-profile-info">
             <div class="conductor-avatar">👨‍✈️</div>
             <div>
-                <h3 class="conductor-name">Rajesh Sharma</h3>
-                <span class="conductor-id-badge">ID: COND-9042 • Shift Active</span>
+                <h3 class="conductor-name" id="display-conductor-name">Rajesh Sharma</h3>
+                <span class="conductor-id-badge" id="display-conductor-badge">ID: COND-9042 • Shift Active</span>
             </div>
+            <button onclick="resetConductorProfile()" style="background: none; border: none; font-size: 12px; color: var(--primary-blue); cursor: pointer; text-decoration: underline; margin-left: 6px;">Change</button>
         </div>
         <div class="gps-status-pill" id="gps-status-pill">
             <span class="pill-dot"></span>
