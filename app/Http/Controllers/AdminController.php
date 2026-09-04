@@ -75,4 +75,33 @@ class AdminController extends Controller
             'message' => 'Bus error status resolved.'
         ]);
     }
+
+    /**
+     * Forcibly terminate a live bus broadcast session by Admin
+     */
+    public function terminateSession($id)
+    {
+        $numericId = (int) str_replace('BUS-', '', $id);
+        $bus = Bus::find($numericId) ?: Bus::find($id);
+
+        if ($bus) {
+            $bus->update([
+                'status' => 'no_session',
+                'last_updated_at' => now()
+            ]);
+        }
+
+        // Close any active conductor session in DB
+        ConductorSession::where('bus_id', $id)
+            ->whereNull('ended_at')
+            ->update([
+                'ended_at' => now(),
+                'end_reason' => 'terminated_by_admin'
+            ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Bus {$id} live session terminated by Admin."
+        ]);
+    }
 }

@@ -23,3 +23,4 @@ Route::post('/conductor/location', [ConductorController::class, 'updateLocation'
 // Admin Intervention Actions API
 Route::post('/admin/buses/{id}/remind', [AdminController::class, 'sendReminder']);
 Route::post('/admin/buses/{id}/resolve', [AdminController::class, 'resolveError']);
+Route::post('/admin/buses/{id}/terminate', [AdminController::class, 'terminateSession']);
