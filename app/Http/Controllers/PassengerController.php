@@ -22,7 +22,10 @@ class PassengerController extends Controller
     {
         $routeId = $request->query('route_id');
 
-        $query = Bus::with('route');
+        $query = Bus::with(['route', 'sessions' => function($q) {
+            $q->whereNull('ended_at')->with('conductor');
+        }]);
+
         if ($routeId && $routeId !== 'all') {
             $query->where('route_id', $routeId);
         }
@@ -31,6 +34,10 @@ class PassengerController extends Controller
             $routeName = $bus->route ? $bus->route->name : 'Local City Route';
             $parts = explode('↔', $routeName);
             $heading = isset($parts[1]) ? trim($parts[1]) : $routeName;
+
+            $activeSession = $bus->sessions->first();
+            $conductorName = ($activeSession && $activeSession->conductor) ? $activeSession->conductor->name : null;
+            $conductorId = ($activeSession && $activeSession->conductor) ? $activeSession->conductor->id : null;
 
             return [
                 'id' => 'BUS-' . sprintf("%02d", $bus->id),
@@ -42,6 +49,8 @@ class PassengerController extends Controller
                 'status' => $bus->status,
                 'lat' => (float) $bus->current_lat,
                 'lng' => (float) $bus->current_lng,
+                'active_conductor_name' => $conductorName,
+                'active_conductor_id' => $conductorId,
                 'last_updated' => $bus->last_updated_at ? $bus->last_updated_at->diffForHumans() : 'Just now'
             ];
         });

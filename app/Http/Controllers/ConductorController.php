@@ -107,6 +107,22 @@ class ConductorController extends Controller
             );
         }
 
+        // Conflict Prevention: Check if Bus is already live with ANOTHER active conductor!
+        $activeSession = ConductorSession::where('bus_id', $bus->id)
+            ->whereNull('ended_at')
+            ->where('conductor_id', '!=', $conductor->id)
+            ->first();
+
+        if ($bus->status === 'live' && $activeSession) {
+            $activeConductor = Conductor::find($activeSession->conductor_id);
+            $activeName = $activeConductor ? $activeConductor->name : 'another conductor';
+
+            return response()->json([
+                'status' => 'error',
+                'message' => "🔒 Bus {$bus->bus_number} is currently active with {$activeName}. Cannot claim an occupied bus session!"
+            ], 422);
+        }
+
         $session = ConductorSession::create([
             'bus_id' => $bus->id,
             'conductor_id' => $conductor->id,

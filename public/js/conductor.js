@@ -115,15 +115,57 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(err => console.log('API sync notice:', err));
     };
 
+    const updateBusSelectDropdown = () => {
+        const busSelect = document.getElementById('select-bus');
+        if (!busSelect || isTracking) return;
+
+        const profile = loadConductorProfile();
+
+        fetch('/api/passenger/buses?route_id=all')
+            .then(res => res.json())
+            .then(apiRes => {
+                if (apiRes && apiRes.status === 'success' && apiRes.data && apiRes.data.length > 0) {
+                    const currentSelected = busSelect.value;
+                    busSelect.innerHTML = '';
+                    apiRes.data.forEach(b => {
+                        const opt = document.createElement('option');
+                        opt.value = b.id;
+
+                        if (b.status === 'live') {
+                            const isMine = profile && (profile.id == b.active_conductor_id || profile.name === b.active_conductor_name);
+                            if (isMine) {
+                                opt.textContent = `🟢 ${b.id} (${b.bus_number}) — Shift Active (Your Session)`;
+                                opt.disabled = false;
+                            } else {
+                                const conductorLabel = b.active_conductor_name ? `by ${b.active_conductor_name}` : 'Occupied';
+                                opt.textContent = `🔒 ${b.id} (${b.bus_number}) — Occupied ${conductorLabel}`;
+                                opt.disabled = true;
+                            }
+                        } else if (b.status === 'error') {
+                            opt.textContent = `⚠️ ${b.id} (${b.bus_number}) — Shift Handoff Pending @ B2 Bypass`;
+                            opt.disabled = false;
+                        } else {
+                            opt.textContent = `🟢 ${b.id} (${b.bus_number}) — Available (${b.route_name})`;
+                            opt.disabled = false;
+                        }
+
+                        busSelect.appendChild(opt);
+                    });
+
+                    if (currentSelected) busSelect.value = currentSelected;
+                }
+            })
+            .catch(() => {});
+    };
+
+    updateBusSelectDropdown();
+    setInterval(updateBusSelectDropdown, 4000);
+
     let lastPos = null;
     let lastTime = null;
 
     const startShift = () => {
-        isTracking = true;
         const busId = busSelect.value;
-        lastPos = null;
-        lastTime = null;
-
         const profile = loadConductorProfile() || { name: 'Rajesh Sharma', phone: '9876543210', id: 1 };
         const numericBusId = parseInt(busId.replace('BUS-', '')) || 12;
 
@@ -141,8 +183,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 conductor_phone: profile.phone
             })
         }).then(res => res.json())
-          .then(data => console.log('Database Shift session started:', data))
+          .then(data => {
+              if (data && data.status === 'error') {
+                  alert(data.message);
+                  stopShift('manual');
+                  return;
+              }
+              console.log('Database Shift session started:', data);
+          })
           .catch(err => console.warn('Database start notice:', err));
+
+        isTracking = true;
+        lastPos = null;
+        lastTime = null;
 
         // Update UI
         btnToggle.textContent = '🔴 End Shift & Stop GPS Stream';
