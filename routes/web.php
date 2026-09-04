@@ -28,4 +28,5 @@ Route::get('/admin', [AdminController::class, 'overview']);
 Route::get('/admin/dashboard', [AdminController::class, 'overview'])->name('admin.dashboard');
 Route::get('/admin/bus/{id}', [AdminController::class, 'busDetail'])->name('admin.bus.detail');
 Route::get('/admin/session-logs', [AdminController::class, 'sessionLogs'])->name('admin.session.logs');
+Route::post('/api/admin/buses/{id}/terminate', [AdminController::class, 'terminateSession']);
 Route::post('/admin/buses/{id}/terminate', [AdminController::class, 'terminateSession']);

@@ -319,7 +319,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         busesToDisplay.forEach(bus => {
-            if (bus.lat && bus.lng) {
+            // Render map pins ONLY for active live buses or error buses awaiting handoff
+            if (bus.lat && bus.lng && (bus.status === 'live' || bus.status === 'error')) {
                 const marker = L.marker([bus.lat, bus.lng], {
                     icon: createBusIcon(bus.status, bus.id)
                 }).addTo(map);

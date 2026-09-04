@@ -105,7 +105,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
             },
             body: JSON.stringify({ bus_id: numericBusId, lat: lat, lng: lng })
-        }).catch(err => console.log('API sync notice:', err));
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.status === 'terminated') {
+                stopShift('admin_terminated');
+            }
+        })
+        .catch(err => console.log('API sync notice:', err));
     };
 
     let lastPos = null;
@@ -256,6 +263,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 bus.status = 'error'; // Flagged for shift change handoff
                 bus.errorReason = 'Session auto-ended at change point Ghanta Ghar.';
                 alert(`📍 Reached Change Point (Ghanta Ghar)! Shift auto-ended. Bus ${busId} is now awaiting next conductor session.`);
+            } else if (reason === 'admin_terminated') {
+                bus.status = 'no_session';
+                alert(`🛑 Shift Terminated by Admin!\nAdmin has forcibly terminated the live broadcast session for vehicle ${busId}.`);
             } else {
                 bus.status = 'no_session';
             }
@@ -281,4 +291,23 @@ document.addEventListener('DOMContentLoaded', () => {
     btnHandoff.addEventListener('click', () => {
         stopShift('geofence');
     });
+
+    // Heartbeat check for Admin termination signal every 3 seconds
+    setInterval(() => {
+        if (!isTracking) return;
+        const busId = busSelect.value;
+        const numericBusId = parseInt(busId.replace('BUS-', '')) || 12;
+
+        fetch(`/api/passenger/buses?route_id=all`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.status === 'success' && data.data) {
+                    const currentBus = data.data.find(b => b.numeric_id === numericBusId || b.id === busId);
+                    if (currentBus && (currentBus.status === 'no_session' || currentBus.status === 'offline')) {
+                        stopShift('admin_terminated');
+                    }
+                }
+            })
+            .catch(() => {});
+    }, 3000);
 });

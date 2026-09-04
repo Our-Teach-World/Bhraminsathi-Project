@@ -143,6 +143,15 @@ class ConductorController extends Controller
         $bus = $this->findBus($request->bus_id);
 
         if ($bus) {
+            // If admin forcibly terminated this bus, notify conductor app to stop tracking
+            if ($bus->status === 'no_session' || $bus->status === 'offline') {
+                return response()->json([
+                    'status' => 'terminated',
+                    'message' => 'Shift session has been terminated by Admin.',
+                    'bus_id' => $bus->id
+                ]);
+            }
+
             $bus->update([
                 'current_lat' => $request->lat,
                 'current_lng' => $request->lng,
